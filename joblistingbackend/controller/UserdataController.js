@@ -3,18 +3,26 @@ const userschema = require("../Schema/userschema");
 
 const userdatacontroller = async (req, res, next) => {
     try {
-        const { userId } = req.body;
+        const { id } = req.body;
 
-      
-        const userData = await userschema.findById(userId);
+        // Validate the ID before proceeding
+        
+        if (!id) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+
+        console.log("Received user ID:", id);
+
+        // Find the user by ID
+        const userData = await userschema.findById(id);
         if (!userData) {
             return res.status(404).json({ message: "User not found" });
         }
 
-      
-        const jobsData = await jobschema.find({ createdBy: userId });
+        // Get jobs created by the user
+        const jobsData = await jobschema.find({ createdBy: id });
 
-      
+        // Aggregate applicants for all jobs
         const applicants = jobsData.reduce((acc, job) => {
             if (job.applicants && job.applicants.length > 0) {
                 acc.push(...job.applicants);
@@ -22,7 +30,7 @@ const userdatacontroller = async (req, res, next) => {
             return acc;
         }, []);
 
-      
+        // Send the response
         res.status(200).json({
             userdata: {
                 name: userData.name,
@@ -30,7 +38,7 @@ const userdatacontroller = async (req, res, next) => {
                 location: userData.location,
                 regType: userData.regType,
                 jobs: jobsData,
-                applicants,  
+                applicants,
             }
         });
     } catch (error) {
