@@ -3,7 +3,7 @@ const userschema = require("../Schema/userschema");
 
 const userdatacontroller = async (req, res, next) => {
     try {
-        const { id } = req.body
+        const { id } = req.body;
         if (!id) {
             return res.status(400).json({ message: "User ID is required" });
         }
